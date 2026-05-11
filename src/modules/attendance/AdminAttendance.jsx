@@ -197,8 +197,8 @@ const AdminAttendance = () => {
                           {item.punch_in_selfie ? (
 
                             <img
-                              src={`http://localhost:5000/uploads/attendance/${item.punch_in_selfie}`}
-                              alt="Punch In Selfie"
+src={`${import.meta.env.VITE_API_URL}/uploads/attendance/${item.punch_in_selfie}`}
+alt="Punch In Selfie"
                               className="w-14 h-14 rounded-xl object-cover border"
                             />
 
@@ -245,8 +245,7 @@ const AdminAttendance = () => {
                           {item.punch_out_selfie ? (
 
                             <img
-                              src={`http://localhost:5000/uploads/attendance/${item.punch_out_selfie}`}
-                              alt="Punch Out Selfie"
+src={`${import.meta.env.VITE_API_URL}/uploads/attendance/${item.punch_out_selfie}`}                              alt="Punch Out Selfie"
                               className="w-14 h-14 rounded-xl object-cover border"
                             />
 

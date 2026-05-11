@@ -498,7 +498,7 @@ const Expense = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {expense.bill_image ? (
                           <a
-                            href={`http://localhost:5000/uploads/expenses/${expense.bill_image}`}
+                            href={`${import.meta.env.VITE_API_URL}/uploads/attendance/${expense.bill_image}`}
                             target="_blank"
                             rel="noreferrer"
                             className="text-blue-600 hover:text-blue-800 font-medium text-sm"
