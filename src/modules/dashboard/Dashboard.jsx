@@ -97,7 +97,7 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
 
-      <div className="p-6">
+      <div>
 
         {/* HEADER */}
 
