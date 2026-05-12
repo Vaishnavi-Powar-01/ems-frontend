@@ -32,13 +32,9 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       const res = await API.get("/users");
-
-      console.log("USERS:", res.data);
-
       setUsers(Array.isArray(res.data) ? res.data : []);
-
     } catch (err) {
-      console.error(err);
+      console.error("USERS ERROR:", err);
     }
   };
 
@@ -47,12 +43,15 @@ const Users = () => {
     try {
       const res = await API.get("/roles");
 
-      console.log("ROLES:", res.data);
+      console.log("ROLES RESPONSE:", res.data);
 
-      setRoles(Array.isArray(res.data) ? res.data : []);
-
+      setRoles(
+        res.data?.roles ||
+        res.data?.data ||
+        (Array.isArray(res.data) ? res.data : [])
+      );
     } catch (err) {
-      console.error(err);
+      console.error("ROLES ERROR:", err);
     }
   };
 
@@ -61,12 +60,15 @@ const Users = () => {
     try {
       const res = await API.get("/departments");
 
-      console.log("DEPARTMENTS:", res.data);
+      console.log("DEPARTMENTS RESPONSE:", res.data);
 
-      setDepartments(Array.isArray(res.data) ? res.data : []);
-
+      setDepartments(
+        res.data?.departments ||
+        res.data?.data ||
+        (Array.isArray(res.data) ? res.data : [])
+      );
     } catch (err) {
-      console.error(err);
+      console.error("DEPARTMENTS ERROR:", err);
     }
   };
 
@@ -79,7 +81,6 @@ const Users = () => {
   // ================= OPEN ADD =================
   const openAddModal = () => {
     setEditingUser(null);
-
     setForm({
       name: "",
       email: "",
@@ -87,14 +88,12 @@ const Users = () => {
       role_id: "",
       department_id: "",
     });
-
     setIsModalOpen(true);
   };
 
   // ================= OPEN EDIT =================
   const openEditModal = (user) => {
     setEditingUser(user);
-
     setForm({
       name: user.name || "",
       email: user.email || "",
@@ -102,7 +101,6 @@ const Users = () => {
       role_id: user.role_id || "",
       department_id: user.department_id || "",
     });
-
     setIsModalOpen(true);
   };
 
@@ -129,35 +127,24 @@ const Users = () => {
           : null,
       };
 
-      // IMPORTANT
       if (editingUser && !payload.password) {
         delete payload.password;
       }
 
-      console.log("PAYLOAD:", payload);
-
       if (editingUser) {
         await API.put(`/users/${editingUser.id}`, payload);
-
         alert("User updated successfully");
       } else {
         await API.post("/users", payload);
-
         alert("User created successfully");
       }
 
       setIsModalOpen(false);
-
       fetchUsers();
 
     } catch (err) {
       console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-        "Something went wrong"
-      );
-
+      alert(err.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -165,32 +152,21 @@ const Users = () => {
 
   // ================= DELETE =================
   const deleteUser = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this user?"
-    );
-
+    const confirmDelete = window.confirm("Are you sure?");
     if (!confirmDelete) return;
 
     try {
       await API.delete(`/users/${id}`);
-
       alert("User deleted successfully");
-
       fetchUsers();
-
     } catch (err) {
       console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-        "Failed to delete user"
-      );
+      alert(err.response?.data?.message || "Delete failed");
     }
   };
 
   return (
     <DashboardLayout>
-
       <div className="max-w-7xl mx-auto">
 
         {/* HEADER */}
@@ -202,10 +178,7 @@ const Users = () => {
             </div>
 
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">
-                Users
-              </h1>
-
+              <h1 className="text-3xl font-bold text-gray-800">Users</h1>
               <p className="text-sm text-gray-500">
                 Manage employees and permissions
               </p>
@@ -214,7 +187,7 @@ const Users = () => {
 
           <button
             onClick={openAddModal}
-            className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-white"
           >
             <Plus size={18} />
             Create User
@@ -223,281 +196,141 @@ const Users = () => {
         </div>
 
         {/* TABLE */}
-        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-2xl border bg-white">
 
-          <div className="overflow-x-auto">
+          <table className="w-full">
 
-            <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-left">Name</th>
+                <th className="px-6 py-4 text-left">Email</th>
+                <th className="px-6 py-4 text-left">Role</th>
+                <th className="px-6 py-4 text-left">Department</th>
+                <th className="px-6 py-4 text-center">Actions</th>
+              </tr>
+            </thead>
 
-              <thead className="bg-gray-50 border-b border-gray-100">
-
+            <tbody>
+              {users.length === 0 ? (
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Name
-                  </th>
-
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Email
-                  </th>
-
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Role
-                  </th>
-
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Department
-                  </th>
-
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">
-                    Actions
-                  </th>
+                  <td colSpan={5} className="text-center py-10">
+                    No users found
+                  </td>
                 </tr>
+              ) : (
+                users.map((u) => (
+                  <tr key={u.id} className="border-b">
 
-              </thead>
+                    <td className="px-6 py-4">{u.name}</td>
+                    <td className="px-6 py-4">{u.email}</td>
 
-              <tbody>
-
-                {users.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-16 text-center text-gray-400"
-                    >
-                      No users found
+                    <td className="px-6 py-4">
+                      {u.role_name || "N/A"}
                     </td>
+
+                    <td className="px-6 py-4">
+                      {u.department_name || "-"}
+                    </td>
+
+                    <td className="px-6 py-4 text-center">
+                      <button onClick={() => openEditModal(u)}>
+                        <Pencil size={16} />
+                      </button>
+
+                      <button onClick={() => deleteUser(u.id)}>
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+
                   </tr>
-                ) : (
-                  users.map((u) => (
-                    <tr
-                      key={u.id}
-                      className="border-b border-gray-100 hover:bg-gray-50"
-                    >
+                ))
+              )}
+            </tbody>
 
-                      <td className="px-6 py-4">
-                        <div className="font-medium text-gray-800">
-                          {u.name}
-                        </div>
-                      </td>
-
-                      <td className="px-6 py-4 text-gray-600">
-                        {u.email}
-                      </td>
-
-                      <td className="px-6 py-4">
-                        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
-                          {u.role_name || "N/A"}
-                        </span>
-                      </td>
-
-                      <td className="px-6 py-4 text-gray-600">
-                        {u.department_name || "-"}
-                      </td>
-
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-2">
-
-                          <button
-                            onClick={() => openEditModal(u)}
-                            className="rounded-lg bg-blue-50 p-2 text-blue-600 transition hover:bg-blue-100"
-                          >
-                            <Pencil size={16} />
-                          </button>
-
-                          <button
-                            onClick={() => deleteUser(u.id)}
-                            className="rounded-lg bg-red-50 p-2 text-red-600 transition hover:bg-red-100"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-
-                        </div>
-                      </td>
-
-                    </tr>
-                  ))
-                )}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
+          </table>
         </div>
-
       </div>
 
-      {/* ================= MODAL ================= */}
-
+      {/* MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center">
 
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+          <div className="bg-white w-full max-w-lg p-6 rounded-xl">
 
-            {/* HEADER */}
-            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+            <div className="flex justify-between mb-4">
+              <h2 className="text-xl font-bold">
+                {editingUser ? "Edit User" : "Create User"}
+              </h2>
 
-              <div>
-                <h2 className="text-xl font-bold text-gray-800">
-                  {editingUser ? "Edit User" : "Create User"}
-                </h2>
-
-                <p className="text-sm text-gray-500 mt-1">
-                  Manage user details and permissions
-                </p>
-              </div>
-
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-              >
-                <X size={20} />
+              <button onClick={() => setIsModalOpen(false)}>
+                <X />
               </button>
-
             </div>
 
-            {/* FORM */}
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-5 p-6"
-            >
+            <form onSubmit={handleSubmit} className="space-y-4">
 
-              {/* NAME */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Full Name
-                </label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="Name"
+                className="w-full border p-2"
+              />
 
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Email"
+                className="w-full border p-2"
+              />
 
-              {/* EMAIL */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Email
-                </label>
+              <input
+                type="password"
+                name="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Password"
+                className="w-full border p-2"
+              />
 
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
+              {/* ROLE */}
+              <select
+                name="role_id"
+                value={form.role_id}
+                onChange={handleChange}
+                className="w-full border p-2"
+              >
+                <option value="">Select Role</option>
+                {roles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name}
+                  </option>
+                ))}
+              </select>
 
-              {/* PASSWORD */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                  Password
-                </label>
+              {/* DEPARTMENT FIXED */}
+              <select
+                name="department_id"
+                value={form.department_id}
+                onChange={handleChange}
+                className="w-full border p-2"
+              >
+                <option value="">Select Department</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.department_name}
+                  </option>
+                ))}
+              </select>
 
-                <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  required={!editingUser}
-                  placeholder={
-                    editingUser
-                      ? "Leave blank to keep current"
-                      : "Enter password"
-                  }
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-
-              {/* ROLE + DEPARTMENT */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Role
-                  </label>
-
-                  <select
-                    name="role_id"
-                    value={form.role_id}
-                    onChange={handleChange}
-                    required
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">
-                      Select Role
-                    </option>
-
-                    {roles.map((r) => (
-                      <option
-                        key={r.id}
-                        value={r.id}
-                      >
-                        {r.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Department
-                  </label>
-
-                  <select
-                    name="department_id"
-                    value={form.department_id}
-                    onChange={handleChange}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="">
-                      Select Department
-                    </option>
-
-                    {departments.map((d) => (
-                      <option
-                        key={d.id}
-                        value={d.id}
-                      >
-                        {d.department_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-              </div>
-
-              {/* ACTIONS */}
-              <div className="flex justify-end gap-3 pt-3">
-
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="rounded-xl border border-gray-300 px-5 py-3 font-medium text-gray-700 transition hover:bg-gray-100"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-700 disabled:opacity-60"
-                >
-                  <Save size={18} />
-
-                  {loading
-                    ? "Saving..."
-                    : editingUser
-                    ? "Update User"
-                    : "Create User"}
-                </button>
-
-              </div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-blue-600 text-white p-2"
+              >
+                {loading ? "Saving..." : "Save"}
+              </button>
 
             </form>
 
@@ -505,7 +338,6 @@ const Users = () => {
 
         </div>
       )}
-
     </DashboardLayout>
   );
 };
