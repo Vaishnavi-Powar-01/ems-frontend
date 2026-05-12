@@ -62,34 +62,36 @@
 
     // HANDLE SUBMIT
     const handleSubmit = async (e) => {
-      e.preventDefault();
+  e.preventDefault();
 
-      // EMAIL VALIDATION
-      if (!formData.email.endsWith("@gmail.com")) {
-        alert("Email must be a gmail.com address");
-        return;
-      }
+  if (!formData.email.endsWith("@gmail.com")) {
+    alert("Email must be a gmail.com address");
+    return;
+  }
 
-      // PASSWORD VALIDATION
-      if (formData.password.length < 6) {
-        alert("Password must be at least 6 characters");
-        return;
-      }
+  if (formData.password.length < 6) {
+    alert("Password must be at least 6 characters");
+    return;
+  }
 
-      try {
-        const response = await API.post("/auth/register", formData);
-
-        alert(response.data.message);
-
-        navigate("/");
-      } catch (error) {
-        console.log("REGISTER ERROR FULL:", error.response?.data);
-
-        alert(
-          error.response?.data?.message || "Registration Failed"
-        );
-      }
+  try {
+    const cleanData = {
+      ...formData,
+      role: formData.role?.toLowerCase().trim(),
     };
+
+    console.log("REGISTER PAYLOAD:", cleanData);
+
+    const response = await API.post("/auth/register", cleanData);
+
+    alert(response.data.message);
+    navigate("/");
+  } catch (error) {
+    console.log("REGISTER ERROR:", error.response?.data);
+
+    alert(error.response?.data?.message || "Registration Failed");
+  }
+};
 
     return (
       <div className="min-h-screen flex items-center justify-center bg-blue-50">
@@ -200,7 +202,7 @@
                     <option value="">Select role</option>
 
                     {roles.map((role) => (
-                      <option key={role.id} value={role.id}>
+                      <option key={role.id} value={role.name.toLowerCase()}>
                         {role.name}
                       </option>
                     ))}
@@ -212,7 +214,6 @@
                   <label className="text-sm font-medium text-gray-700 block mb-1">
                     Department
                   </label>
-
                   <select
                     name="department"
                     onChange={handleChange}
