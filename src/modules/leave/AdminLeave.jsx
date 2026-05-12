@@ -10,7 +10,7 @@ const isPDF = (filename) => {
   if (!filename) return false;
   return filename.toLowerCase().endsWith(".pdf");
 };
-
+ console.log(import.meta.env.VITE_API_URL)
 const AdminLeave = () => {
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(false);
