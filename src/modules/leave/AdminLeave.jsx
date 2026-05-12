@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { MoreVertical } from "lucide-react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import API from "../../api/axios";
-import { getImageUrl } from "../../utils/imageUrl";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "");
 
@@ -155,7 +154,7 @@ const AdminLeave = () => {
                       {/* ✅ DOCUMENT COLUMN */}
                       <td className="p-4">
                         {leave.document ? (   
-                           <a href={getImageUrl("leaves", leave.document)}
+                           <a href={`${IMAGE_BASE_URL}/uploads/leaves/${leave.document}`}
                             target="_blank"
                             rel="noreferrer"
                             className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
