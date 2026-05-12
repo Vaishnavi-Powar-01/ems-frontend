@@ -9,7 +9,6 @@ const Sidebar = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const [departments, setDepartments] = useState([]);
 
-
   // MENU ITEMS
   const menuItems = [
     {
@@ -271,8 +270,8 @@ const Sidebar = () => {
                   </span>
                   <span className="text-sm font-medium">{item.name}</span>
                   {isActive && (
-  <div className="ml-auto h-2 w-2 rounded-full bg-white"></div>
-)}
+                    <div className="ml-auto h-2 w-2 rounded-full bg-white"></div>
+                  )}
                 </Link>
               </li>
             );

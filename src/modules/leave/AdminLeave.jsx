@@ -150,6 +150,7 @@ const AdminLeave = () => {
                         {leave.reason}
                       </td>
 
+                    
                       {/* ✅ DOCUMENT COLUMN */}
                       <td className="p-4">
                         {leave.document ? (   
