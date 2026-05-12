@@ -307,7 +307,7 @@ const Users = () => {
 
                           <Shield size={14} />
 
-                          {u.role_name || u.role || "N/A"}
+                          {u.role_name || "N/A"}
 
                         </span>
 
@@ -320,7 +320,7 @@ const Users = () => {
 
                           <Building2 size={14} />
 
-                          {u.department_name || u.deparment || "Not Assigned"}
+                          {u.department_name || "Not Assigned"}
 
                         </span>
 
