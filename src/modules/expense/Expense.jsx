@@ -16,6 +16,8 @@ const Expense = () => {
     bill: null,
   });
 
+  const IMAGE_BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "");
+
   // Get today's date in YYYY-MM-DD format
   const getTodayDate = () => {
     const today = new Date();
@@ -498,7 +500,7 @@ const Expense = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {expense.bill_image ? (
                           <a
-                            href={`${import.meta.env.VITE_API_URL}/uploads/attendance/${expense.bill_image}`}
+                            href={`${IMAGE_BASE_URL}/uploads/expenses/${expense.bill_image}`}
                             target="_blank"
                             rel="noreferrer"
                             className="text-blue-600 hover:text-blue-800 font-medium text-sm"
