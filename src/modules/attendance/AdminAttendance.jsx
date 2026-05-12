@@ -29,6 +29,22 @@ const formatDate = (dateString) => {
   }
 };
 
+const formatTime = (dateString) => {
+  if (!dateString) return "-";
+
+  try {
+    return new Date(dateString).toLocaleTimeString("en-IN", {
+      timeZone: "Asia/Kolkata",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+  } catch {
+    return dateString;
+  }
+};
+
 const AdminAttendance = () => {
 
   const [attendance, setAttendance] = useState([]);
@@ -216,12 +232,7 @@ alt="Punch In Selfie"
 
                             <p className="text-sm font-semibold text-green-600">
 
-                              {item.punch_in
-                                ?.split("T")[1]
-                                ?.substring(
-                                  0,
-                                  8
-                                )}
+                              {formatTime(item.punch_in)}
 
                             </p>
 
@@ -263,12 +274,7 @@ src={`${import.meta.env.VITE_API_URL}/uploads/attendance/${item.punch_out_selfie
 
                             <p className="text-sm font-semibold text-red-500">
 
-                              {item.punch_out
-                                ?.split("T")[1]
-                                ?.substring(
-                                  0,
-                                  8
-                                ) || "-"}
+                              {formatTime(item.punch_out)}
 
                             </p>
 
