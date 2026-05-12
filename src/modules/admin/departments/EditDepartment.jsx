@@ -73,7 +73,7 @@ const EditDepartment = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="p-6 max-w-3xl mx-auto animate-pulse">
+        <div className="max-w-4xl mx-auto ">
           <div className="h-6 w-40 bg-gray-200 rounded mb-6"></div>
 
           <div className="bg-white p-6 rounded-xl shadow space-y-4">
@@ -110,7 +110,7 @@ const EditDepartment = () => {
         {/* Card */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl shadow-md border p-6 space-y-5"
+          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-6"
         >
 
           {/* Department Name */}
@@ -123,8 +123,7 @@ const EditDepartment = () => {
               value={formData.departmentName}
               onChange={handleChange}
               placeholder="Enter department name"
-              className="w-full mt-1 border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-              required
+className="w-full mt-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"              required
             />
           </div>
 
@@ -139,8 +138,7 @@ const EditDepartment = () => {
                 value={formData.departmentCode}
                 onChange={handleChange}
                 placeholder="e.g. HR01"
-                className="w-full mt-1 border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
+  className="w-full mt-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"              />
             </div>
 
             <div>
@@ -152,8 +150,7 @@ const EditDepartment = () => {
                 value={formData.managerName}
                 onChange={handleChange}
                 placeholder="Manager name"
-                className="w-full mt-1 border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-              />
+  className="w-full mt-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"              />
             </div>
           </div>
 
@@ -168,28 +165,27 @@ const EditDepartment = () => {
               onChange={handleChange}
               rows={4}
               placeholder="Department details..."
-              className="w-full mt-1 border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-            />
+className="w-full mt-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"            />
           </div>
 
 
           {/* Submit */}
           <button
-            disabled={saving}
-            className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition disabled:opacity-60"
-          >
-            {saving ? (
-              <>
-                <Loader2 className="animate-spin" size={18} />
-                Updating...
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                Update Department
-              </>
-            )}
-          </button>
+  disabled={saving}
+  className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 font-medium text-white transition hover:bg-blue-700 disabled:opacity-60"
+>
+  {saving ? (
+    <>
+      <Loader2 className="animate-spin" size={18} />
+      Updating...
+    </>
+  ) : (
+    <>
+      <Save size={18} />
+      Update Department
+    </>
+  )}
+</button>
 
         </form>
       </div>

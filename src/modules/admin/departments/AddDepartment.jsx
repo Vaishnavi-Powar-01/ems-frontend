@@ -1,247 +1,203 @@
-import {
-  useState,
-} from "react";
-
-import DashboardLayout
-from "../../../layouts/DashboardLayout";
-
+import { useState } from "react";
+import DashboardLayout from "../../../layouts/DashboardLayout";
 import {
   Building2,
+  ArrowLeft,
+  Save,
 } from "lucide-react";
-
-import {
-  useNavigate,
-  Link,
-} from "react-router-dom";
-
-import API
-from "../../../api/axios";
+import { useNavigate } from "react-router-dom";
+import API from "../../../api/axios";
 
 const Departments = () => {
-const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  const [formData,
-    setFormData] =
-    useState({
-      departmentName: "",
-      departmentCode: "",
-      managerName: "",
-      description: "",
+  const [saving, setSaving] = useState(false);
+
+  const [formData, setFormData] = useState({
+    departmentName: "",
+    departmentCode: "",
+    managerName: "",
+    description: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
     });
-
-  const handleChange =
-    (e) => {
-
-      setFormData({
-        ...formData,
-        [e.target.name]:
-          e.target.value,
-      });
   };
 
-const handleSubmit =
-  async (e) => {
-
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      setSaving(true);
 
-      await API.post(
-        "/departments/add",
-        formData
-      );
+      await API.post("/departments/add", formData);
 
-      alert(
-        "Department Added Successfully"
-      );
+      alert("Department added successfully");
 
-      navigate("/dashboard");
+      navigate("/admin/departments");
 
     } catch (error) {
-
       console.log(error);
-
-      alert(
-        "Failed to add department"
-      );
+      alert("Failed to add department");
+    } finally {
+      setSaving(false);
     }
-};
+  };
+
   return (
+    <DashboardLayout>
 
-  <DashboardLayout>
+      <div className="max-w-4xl mx-auto">
 
-    <div className="p-6">
+        {/* HEADER */}
+        <div className="flex items-center justify-between mb-6">
 
-      {/* BACK BUTTON */}
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-5 flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
-      >
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-gray-600 hover:text-blue-600 transition"
+          >
+            <ArrowLeft size={18} />
+            Back
+          </button>
 
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
-          />
-
-        </svg>
-
-        Back
-
-      </button>
-
-      <div className="bg-white rounded-2xl shadow-md p-8 max-w-3xl">
-
-        <div className="flex items-center gap-3 mb-6">
-
-          <div className="bg-blue-100 p-3 rounded-xl">
-
-            <Building2
-              className="text-blue-600"
-              size={28}
-            />
-
-          </div>
-
-          <div>
-
-            <h1 className="text-3xl font-bold text-gray-800">
-              Add Department
-            </h1>
-
-            <p className="text-gray-500">
-              Create and manage
-              company departments
-            </p>
-
+          <div className="flex items-center gap-2 text-gray-800 font-semibold">
+            <Building2 size={22} />
+            Add Department
           </div>
 
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
-        >
+        {/* CARD */}
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-8">
 
-          {/* NAME */}
-          <div>
+          {/* TOP */}
+          <div className="flex items-center gap-4 mb-8">
 
-            <label className="block mb-2 font-medium">
-              Department Name
-            </label>
+            <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center">
+              <Building2 className="text-blue-600" size={28} />
+            </div>
 
-            <input
-              type="text"
-              name="departmentName"
-              value={
-                formData.departmentName
-              }
-              onChange={handleChange}
-              placeholder="Enter department name"
-              className="w-full border rounded-xl p-4 outline-none focus:border-blue-500"
-              required
-            />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Create Department
+              </h1>
+
+              <p className="text-sm text-gray-500 mt-1">
+                Add and manage company departments
+              </p>
+            </div>
 
           </div>
 
-          {/* CODE */}
-          <div>
+          {/* FORM */}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-6"
+          >
 
-            <label className="block mb-2 font-medium">
-              Department Code
-            </label>
+            {/* NAME */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Department Name
+              </label>
 
-            <input
-              type="text"
-              name="departmentCode"
-              value={
-                formData.departmentCode
-              }
-              onChange={handleChange}
-              placeholder="Enter department code"
-              className="w-full border rounded-xl p-4 outline-none focus:border-blue-500"
-            />
+              <input
+                type="text"
+                name="departmentName"
+                value={formData.departmentName}
+                onChange={handleChange}
+                placeholder="Enter department name"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                required
+              />
+            </div>
 
-          </div>
+            {/* GRID */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-          {/* MANAGER */}
-          <div>
+              {/* CODE */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Department Code
+                </label>
 
-            <label className="block mb-2 font-medium">
-              Department Manager
-            </label>
+                <input
+                  type="text"
+                  name="departmentCode"
+                  value={formData.departmentCode}
+                  onChange={handleChange}
+                  placeholder="e.g. HR01"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
 
-            <input
-              type="text"
-              name="managerName"
-              value={
-                formData.managerName
-              }
-              onChange={handleChange}
-              placeholder="Enter manager name"
-              className="w-full border rounded-xl p-4 outline-none focus:border-blue-500"
-            />
+              {/* MANAGER */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Manager Name
+                </label>
 
-          </div>
+                <input
+                  type="text"
+                  name="managerName"
+                  value={formData.managerName}
+                  onChange={handleChange}
+                  placeholder="Enter manager name"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
 
-          {/* DESCRIPTION */}
-          <div>
+            </div>
 
-            <label className="block mb-2 font-medium">
-              Description
-            </label>
+            {/* DESCRIPTION */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description
+              </label>
 
-            <textarea
-              rows="4"
-              name="description"
-              value={
-                formData.description
-              }
-              onChange={handleChange}
-              placeholder="Enter description"
-              className="w-full border rounded-xl p-4 outline-none focus:border-blue-500"
-            />
+              <textarea
+                rows="5"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Enter department description"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 resize-none"
+              />
+            </div>
 
-          </div>
+            {/* BUTTONS */}
+            <div className="flex items-center gap-4 pt-2">
 
-          {/* BUTTONS */}
-          <div className="flex items-center gap-3">
+              <button
+                type="submit"
+                disabled={saving}
+                className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700 disabled:opacity-60"
+              >
+                <Save size={18} />
+                {saving ? "Saving..." : "Add Department"}
+              </button>
 
-            <button
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium"
-            >
-              Add Department
-            </button>
+              <button
+                type="button"
+                onClick={() => navigate("/admin/departments")}
+                className="rounded-xl border border-gray-300 px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-100"
+              >
+                Cancel
+              </button>
 
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard")}
-              className="border border-gray-300 hover:bg-gray-100 px-6 py-4 rounded-xl font-medium"
-            >
-              Cancel
-            </button>
+            </div>
 
-          </div>
+          </form>
 
-        </form>
+        </div>
 
       </div>
 
-    </div>
-
-  </DashboardLayout>
-
-);
+    </DashboardLayout>
+  );
 };
 
 export default Departments;

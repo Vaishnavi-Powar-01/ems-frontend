@@ -2,6 +2,15 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import API from "../../api/axios";
 
+import {
+  Users as UsersIcon,
+  Plus,
+  Pencil,
+  Trash2,
+  X,
+  Save,
+} from "lucide-react";
+
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -19,12 +28,15 @@ const Users = () => {
     department_id: "",
   });
 
-
   // ================= FETCH USERS =================
   const fetchUsers = async () => {
     try {
       const res = await API.get("/users");
-      setUsers(res.data);
+
+      console.log("USERS:", res.data);
+
+      setUsers(Array.isArray(res.data) ? res.data : []);
+
     } catch (err) {
       console.error(err);
     }
@@ -34,7 +46,11 @@ const Users = () => {
   const fetchRoles = async () => {
     try {
       const res = await API.get("/roles");
-      setRoles(res.data);
+
+      console.log("ROLES:", res.data);
+
+      setRoles(Array.isArray(res.data) ? res.data : []);
+
     } catch (err) {
       console.error(err);
     }
@@ -44,7 +60,11 @@ const Users = () => {
   const fetchDepartments = async () => {
     try {
       const res = await API.get("/departments");
-      setDepartments(res.data);
+
+      console.log("DEPARTMENTS:", res.data);
+
+      setDepartments(Array.isArray(res.data) ? res.data : []);
+
     } catch (err) {
       console.error(err);
     }
@@ -56,254 +76,433 @@ const Users = () => {
     fetchDepartments();
   }, []);
 
-
   // ================= OPEN ADD =================
   const openAddModal = () => {
-    setForm({ name: "", email: "", password: "", role_id: "", department_id: "" });
     setEditingUser(null);
+
+    setForm({
+      name: "",
+      email: "",
+      password: "",
+      role_id: "",
+      department_id: "",
+    });
+
     setIsModalOpen(true);
   };
 
   // ================= OPEN EDIT =================
   const openEditModal = (user) => {
     setEditingUser(user);
+
     setForm({
-      name: user.name,
-      email: user.email,
-      password: "",                                   // never pre-fill password
+      name: user.name || "",
+      email: user.email || "",
+      password: "",
       role_id: user.role_id || "",
       department_id: user.department_id || "",
     });
+
     setIsModalOpen(true);
   };
 
-  // ================= HANDLE INPUT =================
+  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
-
-  // ================= SUBMIT (CREATE / UPDATE) =================
+  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
-      if (editingUser) {
-        // Don't send password if left blank on edit
-        const payload = { ...form };
-        if (!payload.password) delete payload.password;
+      setLoading(true);
 
+      const payload = {
+        ...form,
+        role_id: Number(form.role_id),
+        department_id: form.department_id
+          ? Number(form.department_id)
+          : null,
+      };
+
+      // IMPORTANT
+      if (editingUser && !payload.password) {
+        delete payload.password;
+      }
+
+      console.log("PAYLOAD:", payload);
+
+      if (editingUser) {
         await API.put(`/users/${editingUser.id}`, payload);
-        alert("User Updated");
+
+        alert("User updated successfully");
       } else {
-        await API.post("/users", form);
-        alert("User Created");
+        await API.post("/users", payload);
+
+        alert("User created successfully");
       }
 
       setIsModalOpen(false);
+
       fetchUsers();
+
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Something went wrong");
+
+      alert(
+        err.response?.data?.message ||
+        "Something went wrong"
+      );
+
     } finally {
       setLoading(false);
     }
   };
 
-
   // ================= DELETE =================
   const deleteUser = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this user?"
+    );
+
+    if (!confirmDelete) return;
+
     try {
       await API.delete(`/users/${id}`);
-      alert("User Deleted");
+
+      alert("User deleted successfully");
+
       fetchUsers();
+
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to delete user");
+
+      alert(
+        err.response?.data?.message ||
+        "Failed to delete user"
+      );
     }
   };
 
-
   return (
     <DashboardLayout>
-      <div className="p-6">
+
+      <div className="max-w-7xl mx-auto">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Users</h1>
+        <div className="flex items-center justify-between mb-8">
+
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center">
+              <UsersIcon className="text-blue-600" size={24} />
+            </div>
+
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">
+                Users
+              </h1>
+
+              <p className="text-sm text-gray-500">
+                Manage employees and permissions
+              </p>
+            </div>
+          </div>
+
           <button
             onClick={openAddModal}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-700"
           >
-            + Create User
+            <Plus size={18} />
+            Create User
           </button>
+
         </div>
 
         {/* TABLE */}
-        <div className="bg-white p-5 rounded-xl shadow">
-          <table className="w-full border">
-            <thead>
-              <tr className="bg-gray-100 text-left">
-                <th className="p-3 border">Name</th>
-                <th className="p-3 border">Email</th>
-                <th className="p-3 border">Role</th>
-                <th className="p-3 border">Department</th>
-                <th className="p-3 border">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.length === 0 ? (
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+
+          <div className="overflow-x-auto">
+
+            <table className="w-full">
+
+              <thead className="bg-gray-50 border-b border-gray-100">
+
                 <tr>
-                  <td colSpan={5} className="p-6 text-center text-gray-400">
-                    No users found
-                  </td>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                    Name
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                    Email
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                    Role
+                  </th>
+
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                    Department
+                  </th>
+
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">
+                    Actions
+                  </th>
                 </tr>
-              ) : (
-                users.map((u) => (
-                  <tr key={u.id} className="hover:bg-gray-50">
-                    <td className="p-3 border">{u.name}</td>
-                    <td className="p-3 border">{u.email}</td>
-                    {/* ✅ Use role_name / department_name from joined query */}
-                    <td className="p-3 border">{u.role_name || u.role || "—"}</td>
-                    <td className="p-3 border">{u.department_name || u.department || "—"}</td>
-                    <td className="p-3 border">
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => openEditModal(u)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition-colors"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => deleteUser(u.id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </div>
+
+              </thead>
+
+              <tbody>
+
+                {users.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="py-16 text-center text-gray-400"
+                    >
+                      No users found
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  users.map((u) => (
+                    <tr
+                      key={u.id}
+                      className="border-b border-gray-100 hover:bg-gray-50"
+                    >
+
+                      <td className="px-6 py-4">
+                        <div className="font-medium text-gray-800">
+                          {u.name}
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4 text-gray-600">
+                        {u.email}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
+                          {u.role_name || "N/A"}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-gray-600">
+                        {u.department_name || "-"}
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-2">
+
+                          <button
+                            onClick={() => openEditModal(u)}
+                            className="rounded-lg bg-blue-50 p-2 text-blue-600 transition hover:bg-blue-100"
+                          >
+                            <Pencil size={16} />
+                          </button>
+
+                          <button
+                            onClick={() => deleteUser(u.id)}
+                            className="rounded-lg bg-red-50 p-2 text-red-600 transition hover:bg-red-100"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+
+                        </div>
+                      </td>
+
+                    </tr>
+                  ))
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
         </div>
+
       </div>
 
-
       {/* ================= MODAL ================= */}
+
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl w-[420px] shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
 
-            <h2 className="text-xl font-bold mb-4">
-              {editingUser ? "Edit User" : "Create User"}
-            </h2>
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            {/* HEADER */}
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  {editingUser ? "Edit User" : "Create User"}
+                </h2>
+
+                <p className="text-sm text-gray-500 mt-1">
+                  Manage user details and permissions
+                </p>
+              </div>
+
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+
+            </div>
+
+            {/* FORM */}
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-5 p-6"
+            >
 
               {/* NAME */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Full Name
+                </label>
+
                 <input
                   name="name"
                   value={form.name}
                   onChange={handleChange}
-                  placeholder="Full Name"
                   required
-                  className="w-full border p-2 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
 
               {/* EMAIL */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Email
+                </label>
+
                 <input
                   type="email"
                   name="email"
                   value={form.email}
                   onChange={handleChange}
-                  placeholder="Email"
                   required
-                  className="w-full border p-2 rounded-lg focus:outline-none focus:border-blue-500"
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
 
               {/* PASSWORD */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password {editingUser && <span className="text-gray-400 font-normal">(leave blank to keep current)</span>}
+                <label className="mb-2 block text-sm font-medium text-gray-700">
+                  Password
                 </label>
+
                 <input
                   type="password"
                   name="password"
                   value={form.password}
                   onChange={handleChange}
-                  placeholder={editingUser ? "Leave blank to keep current" : "Password"}
                   required={!editingUser}
-                  className="w-full border p-2 rounded-lg focus:outline-none focus:border-blue-500"
+                  placeholder={
+                    editingUser
+                      ? "Leave blank to keep current"
+                      : "Enter password"
+                  }
+                  className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
 
-              {/* ROLE DROPDOWN */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select
-                  name="role_id"
-                  value={form.role_id}
-                  onChange={handleChange}
-                  required
-                  className="w-full border p-2 rounded-lg focus:outline-none focus:border-blue-500"
-                >
-                  <option value="">Select Role</option>
-                  {roles.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      {r.name || r.role_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* ROLE + DEPARTMENT */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-              {/* DEPARTMENT DROPDOWN — ✅ fixed: was d.name, now d.department_name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                <select
-                  name="department_id"
-                  value={form.department_id}
-                  onChange={handleChange}
-                  className="w-full border p-2 rounded-lg focus:outline-none focus:border-blue-500"
-                >
-                  <option value="">Select Department</option>
-                  {departments.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.department_name}
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Role
+                  </label>
+
+                  <select
+                    name="role_id"
+                    value={form.role_id}
+                    onChange={handleChange}
+                    required
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  >
+                    <option value="">
+                      Select Role
                     </option>
-                  ))}
-                </select>
+
+                    {roles.map((r) => (
+                      <option
+                        key={r.id}
+                        value={r.id}
+                      >
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    Department
+                  </label>
+
+                  <select
+                    name="department_id"
+                    value={form.department_id}
+                    onChange={handleChange}
+                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  >
+                    <option value="">
+                      Select Department
+                    </option>
+
+                    {departments.map((d) => (
+                      <option
+                        key={d.id}
+                        value={d.id}
+                      >
+                        {d.department_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
               </div>
 
               {/* ACTIONS */}
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-3 pt-3">
+
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="bg-gray-200 hover:bg-gray:300 text-gray-700 px-4 py-2 rounded-lg transition-colors"
+                  className="rounded-xl border border-gray-300 px-5 py-3 font-medium text-gray-700 transition hover:bg-gray-100"
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
                   disabled={loading}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-700 disabled:opacity-60"
                 >
-                  {loading ? "Saving..." : editingUser ? "Update" : "Create"}
+                  <Save size={18} />
+
+                  {loading
+                    ? "Saving..."
+                    : editingUser
+                    ? "Update User"
+                    : "Create User"}
                 </button>
+
               </div>
 
             </form>
+
           </div>
+
         </div>
       )}
 
