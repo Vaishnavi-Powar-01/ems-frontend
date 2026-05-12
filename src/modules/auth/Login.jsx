@@ -4,87 +4,95 @@ import { AuthContext } from "../../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 
 const Login = () => {
-
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
-  const { login } =
-    useContext(AuthContext);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-  const [formData, setFormData] =
-    useState({
-      email: "",
-      password: "",
-    });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [isLoading, setIsLoading] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  // HANDLE INPUT CHANGE
+  // INPUT CHANGE
   const handleChange = (e) => {
-
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
 
     if (error) setError("");
-
   };
 
-  // HANDLE LOGIN
+  // LOGIN
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setError("");
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
-  try {
-    const response = await API.post("/auth/login", formData);
+    try {
+      const response = await API.post("/auth/login", formData);
 
-    // 🔥 DEBUG LOGS (ADDED HERE)
-    console.log("LOGIN RESPONSE:", response.data);
-    console.log("USER:", response.data.user || response.data);
+      console.log("LOGIN RESPONSE:", response.data);
 
-    // USER + TOKEN
-    const user = response.data.user;
-    const token = response.data.token;
+      const user = response.data.user;
+      const token = response.data.token;
 
-    console.log("EXTRACTED USER:", user); // 🔥 extra debug
+      // ❌ safety check
+      if (!user || !token) {
+        throw new Error("Invalid server response");
+      }
 
-    // SAVE LOGIN
-    login(user, token);
+      // ✅ CLEAN USER (IMPORTANT FIX)
+      const cleanUser = {
+        ...user,
+        role: user.role?.toLowerCase().trim(),
+      };
 
-    // ROLE CHECK DEBUG
-    console.log("USER ROLE:", user?.role);
+      console.log("CLEAN USER:", cleanUser);
 
-    // ROLE BASED REDIRECT
-    if (user.role === "admin") {
-      navigate("/dashboard");
-    } else {
-      navigate("/attendance");
+      // SAVE TO CONTEXT + LOCALSTORAGE
+      login(cleanUser, token);
+
+      // ✅ ROLE BASED REDIRECT (FIXED)
+      switch (cleanUser.role) {
+        case "admin":
+          navigate("/dashboard");
+          break;
+
+        case "hr":
+          navigate("/hr");
+          break;
+
+        case "manager":
+          navigate("/manager");
+          break;
+
+        case "employee":
+        default:
+          navigate("/attendance");
+          break;
+      }
+
+    } catch (error) {
+      console.error("Login error:", error);
+
+      const errorMessage =
+        error.response?.data?.message ||
+        "Login failed. Please check your credentials.";
+
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-  } catch (error) {
-    console.error("Login error:", error);
-
-    const errorMessage =
-      error.response?.data?.message ||
-      "Login Failed. Please check your credentials.";
-
-    setError(errorMessage);
-  } finally {
-    setIsLoading(false);
-  }
-};
   return (
-
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 px-4">
 
       <div className="w-full max-w-md">
 
-        {/* CARD */}
         <div className="bg-white rounded-2xl shadow-xl border border-blue-100 p-8 md:p-10">
 
           {/* HEADER */}
@@ -106,26 +114,16 @@ const Login = () => {
 
           {/* ERROR */}
           {error && (
-
             <div className="mb-6 p-3 bg-red-50 border-l-4 border-red-500 rounded-lg">
-
-              <p className="text-sm text-red-700">
-                {error}
-              </p>
-
+              <p className="text-sm text-red-700">{error}</p>
             </div>
-
           )}
 
           {/* FORM */}
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-5"
-          >
+          <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* EMAIL */}
             <div>
-
               <label className="text-sm font-medium text-gray-700 block mb-2">
                 Email address
               </label>
@@ -139,12 +137,10 @@ const Login = () => {
                 required
                 className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
               />
-
             </div>
 
             {/* PASSWORD */}
             <div>
-
               <label className="text-sm font-medium text-gray-700 block mb-2">
                 Password
               </label>
@@ -158,24 +154,19 @@ const Login = () => {
                 required
                 className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all"
               />
-
             </div>
 
             {/* FORGOT PASSWORD */}
             <div className="flex justify-end">
-
               <button
                 type="button"
                 onClick={() =>
-                  alert(
-                    "Password reset link will be sent to your email."
-                  )
+                  alert("Password reset link will be sent to your email.")
                 }
                 className="text-xs text-blue-600 hover:text-blue-700 font-medium"
               >
                 Forgot password?
               </button>
-
             </div>
 
             {/* LOGIN BUTTON */}
@@ -184,77 +175,26 @@ const Login = () => {
               disabled={isLoading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-70 disabled:cursor-not-allowed"
             >
-
-              {isLoading ? (
-
-                <div className="flex items-center justify-center gap-2">
-
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-
-                  </svg>
-
-                  <span>
-                    Signing in...
-                  </span>
-
-                </div>
-
-              ) : (
-
-                "Sign in"
-
-              )}
-
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
 
           </form>
 
           {/* REGISTER */}
           <div className="mt-6 text-center">
-
             <p className="text-sm text-gray-500">
-
               Don't have an account?{" "}
-
-              <Link
-                to="/register"
-                className="text-blue-600 font-medium hover:underline"
-              >
+              <Link to="/register" className="text-blue-600 font-medium hover:underline">
                 Register here
               </Link>
-
             </p>
-
           </div>
 
         </div>
 
       </div>
-
     </div>
-
   );
-
 };
 
 export default Login;

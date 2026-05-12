@@ -5,13 +5,18 @@ export const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+useEffect(() => {
+  const storedUser = localStorage.getItem("user");
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  if (storedUser) {
+    const parsedUser = JSON.parse(storedUser);
+
+    setUser({
+      ...parsedUser,
+      role: parsedUser.role?.toLowerCase().trim(),
+    });
+  }
+}, []);
 
   const login = (userData, token) => {
     localStorage.setItem("user", JSON.stringify(userData));
