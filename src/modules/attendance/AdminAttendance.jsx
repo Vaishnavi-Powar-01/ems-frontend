@@ -187,7 +187,7 @@ const AdminAttendance = () => {
                           </p>
 
                           <p className="text-xs text-gray-500">
-                            {item.department || "N/A"}
+                            {item.department || item.department_name || "N/A"}
                           </p>
 
                         </div>
