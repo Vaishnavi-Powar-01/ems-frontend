@@ -204,21 +204,6 @@ const Users = () => {
 
                 </div>
 
-                {/* ROLE + DEPT DISPLAY */}
-                <div className="flex flex-col gap-2 text-sm mb-4">
-
-                  <span className="flex items-center gap-1 text-blue-600">
-                    <Shield size={14} />
-                    {u.role_name || "No Role"}
-                  </span>
-
-                  <span className="flex items-center gap-1 text-gray-600">
-                    <Building2 size={14} />
-                    {u.department_name || "No Department"}
-                  </span>
-
-                </div>
-
                 {/* ACTIONS */}
                 <div className="flex justify-end gap-2">
 
