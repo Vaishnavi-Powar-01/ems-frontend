@@ -16,7 +16,6 @@ const EditDepartment = () => {
     departmentCode: "",
     managerName: "",
     description: "",
-    status: "Active",
   });
 
   const fetchDepartmentDetails = async () => {
@@ -30,7 +29,6 @@ const EditDepartment = () => {
         departmentCode: d.department_code || "",
         managerName: d.manager_name || "",
         description: d.description || "",
-        status: d.status || "Active",
       });
     } catch (error) {
       console.error(error);
@@ -174,21 +172,6 @@ const EditDepartment = () => {
             />
           </div>
 
-          {/* Status */}
-          <div>
-            <label className="text-sm font-medium text-gray-600">
-              Status
-            </label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full mt-1 border rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </div>
 
           {/* Submit */}
           <button

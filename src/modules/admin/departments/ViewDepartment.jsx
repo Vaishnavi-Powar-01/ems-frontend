@@ -53,7 +53,6 @@ const ViewDepartment = () => {
 
         <p><b>Code:</b> {department?.department_code}</p>
         <p><b>Manager:</b> {department?.manager_name}</p>
-        <p><b>Status:</b> {department?.status}</p>
         <p><b>Description:</b> {department?.description}</p>
 
         <Link
