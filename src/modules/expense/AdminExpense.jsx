@@ -2,19 +2,21 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import API from "../../api/axios";
 
-import {
-  MoreVertical,
-} from "lucide-react";
+import { MoreVertical } from "lucide-react";
 
 const IMAGE_BASE_URL =
   import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "");
+
+// 🔥 SAFE ID HANDLER (IMPORTANT FIX)
+const getExpenseId = (expense) =>
+  expense.expense_id || expense.id || expense.expenseId || expense._id;
 
 const AdminExpense = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [openMenu, setOpenMenu] = useState(null);
 
-  // FETCH ALL EXPENSES
+  // FETCH EXPENSES
   const fetchExpenses = async () => {
     try {
       setLoading(true);
@@ -30,7 +32,7 @@ const AdminExpense = () => {
   // UPDATE STATUS
   const updateStatus = async (id, status) => {
     if (!id) {
-      console.error("Expense ID missing");
+      console.error("❌ Expense ID missing");
       return;
     }
 
@@ -41,7 +43,7 @@ const AdminExpense = () => {
 
       fetchExpenses();
     } catch (err) {
-      console.log("ERROR:", err.response?.data || err.message);
+      console.log("UPDATE ERROR:", err.response?.data || err.message);
     }
   };
 
@@ -51,19 +53,19 @@ const AdminExpense = () => {
 
   // STATS
   const pendingCount = expenses.filter(
-    (item) => item.status === "pending"
+    (e) => e.status === "pending"
   ).length;
 
   const approvedCount = expenses.filter(
-    (item) => item.status === "approved"
+    (e) => e.status === "approved"
   ).length;
 
   const rejectedCount = expenses.filter(
-    (item) => item.status === "rejected"
+    (e) => e.status === "rejected"
   ).length;
 
   const totalAmount = expenses.reduce(
-    (total, item) => total + Number(item.amount || 0),
+    (sum, e) => sum + Number(e.amount || 0),
     0
   );
 
@@ -72,53 +74,53 @@ const AdminExpense = () => {
       <div className="p-6 bg-blue-50 min-h-screen">
 
         {/* HEADER */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-blue-900">
               Expense Management
             </h1>
-            <p className="text-gray-600 mt-1">
+            <p className="text-gray-600">
               Manage employee expense claims
             </p>
           </div>
 
           <button
             onClick={fetchExpenses}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl shadow"
+            className="bg-blue-600 text-white px-5 py-3 rounded-xl"
           >
             Refresh
           </button>
         </div>
 
-        {/* SUMMARY */}
+        {/* STATS */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
 
-          <div className="bg-white rounded-2xl p-5 shadow">
-            <h2 className="text-gray-500">Pending</h2>
-            <p className="text-3xl font-bold text-yellow-500 mt-3">
+          <div className="bg-white p-5 rounded-2xl shadow">
+            <p className="text-gray-500">Pending</p>
+            <h2 className="text-3xl font-bold text-yellow-500">
               {pendingCount}
-            </p>
+            </h2>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 shadow">
-            <h2 className="text-gray-500">Approved</h2>
-            <p className="text-3xl font-bold text-green-600 mt-3">
+          <div className="bg-white p-5 rounded-2xl shadow">
+            <p className="text-gray-500">Approved</p>
+            <h2 className="text-3xl font-bold text-green-600">
               {approvedCount}
-            </p>
+            </h2>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 shadow">
-            <h2 className="text-gray-500">Rejected</h2>
-            <p className="text-3xl font-bold text-red-600 mt-3">
+          <div className="bg-white p-5 rounded-2xl shadow">
+            <p className="text-gray-500">Rejected</p>
+            <h2 className="text-3xl font-bold text-red-600">
               {rejectedCount}
-            </p>
+            </h2>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 shadow">
-            <h2 className="text-gray-500">Total Amount</h2>
-            <p className="text-3xl font-bold text-blue-600 mt-3">
+          <div className="bg-white p-5 rounded-2xl shadow">
+            <p className="text-gray-500">Total</p>
+            <h2 className="text-3xl font-bold text-blue-600">
               ₹{totalAmount}
-            </p>
+            </h2>
           </div>
 
         </div>
@@ -155,117 +157,102 @@ const AdminExpense = () => {
                   </td>
                 </tr>
               ) : (
-                expenses.map((expense) => (
-                  <tr
-                    key={expense.expense_id}
-                    className="border-b hover:bg-blue-50"
-                  >
+                expenses.map((expense) => {
+                  const id = getExpenseId(expense);
 
-                    <td className="p-4 font-medium">
-                      {expense.name}
-                    </td>
+                  return (
+                    <tr
+                      key={id}
+                      className="border-b hover:bg-blue-50"
+                    >
 
-                    <td className="p-4">
-                      {expense.category}
-                    </td>
+                      <td className="p-4">{expense.name}</td>
+                      <td className="p-4">{expense.category}</td>
+                      <td className="p-4">{expense.vendor}</td>
+                      <td className="p-4 truncate max-w-xs">
+                        {expense.description}
+                      </td>
+                      <td className="p-4 font-semibold">
+                        ₹{expense.amount}
+                      </td>
+                      <td className="p-4">
+                        {expense.expense_date?.split("T")[0]}
+                      </td>
 
-                    <td className="p-4">
-                      {expense.vendor}
-                    </td>
+                      <td className="p-4">
+                        {expense.bill_image ? (
+                          <a
+                            href={`${IMAGE_BASE_URL}/uploads/expenses/${expense.bill_image}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-blue-600 underline"
+                          >
+                            View Bill
+                          </a>
+                        ) : (
+                          "No Bill"
+                        )}
+                      </td>
 
-                    <td className="p-4 truncate max-w-xs">
-                      {expense.description}
-                    </td>
-
-                    <td className="p-4 font-semibold">
-                      ₹{expense.amount}
-                    </td>
-
-                    <td className="p-4">
-                      {expense.expense_date?.split("T")[0]}
-                    </td>
-
-                    <td className="p-4">
-                      {expense.bill_image ? (
-                        <a
-                          href={`${IMAGE_BASE_URL}/uploads/expenses/${expense.bill_image}`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-blue-600 underline"
+                      <td className="p-4">
+                        <span
+                          className={`px-3 py-1 rounded-full text-white text-sm ${
+                            expense.status === "approved"
+                              ? "bg-green-500"
+                              : expense.status === "rejected"
+                              ? "bg-red-500"
+                              : "bg-yellow-500"
+                          }`}
                         >
-                          View Bill
-                        </a>
-                      ) : (
-                        "No Bill"
-                      )}
-                    </td>
+                          {expense.status}
+                        </span>
+                      </td>
 
-                    <td className="p-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-white text-sm ${
-                          expense.status === "approved"
-                            ? "bg-green-500"
-                            : expense.status === "rejected"
-                            ? "bg-red-500"
-                            : "bg-yellow-500"
-                        }`}
-                      >
-                        {expense.status}
-                      </span>
-                    </td>
+                      {/* ACTION */}
+                      <td className="p-4 relative">
 
-                    {/* ACTION */}
-                    <td className="p-4 relative">
+                        <button
+                          onClick={() =>
+                            setOpenMenu(
+                              openMenu === id ? null : id
+                            )
+                          }
+                          className="p-2 hover:bg-gray-200 rounded-full"
+                        >
+                          <MoreVertical size={18} />
+                        </button>
 
-                      <button
-                        onClick={() =>
-                          setOpenMenu(
-                            openMenu === expense.expense_id
-                              ? null
-                              : expense.expense_id
-                          )
-                        }
-                        className="p-2 hover:bg-gray-200 rounded-full"
-                      >
-                        <MoreVertical size={18} />
-                      </button>
+                        {openMenu === id && (
+                          <div className="absolute right-10 mt-2 w-36 bg-white border rounded-xl shadow z-50">
 
-                      {openMenu === expense.expense_id && (
-                        <div className="absolute right-10 mt-2 w-36 bg-white border rounded-xl shadow z-50">
+                            <button
+                              onClick={() => {
+                                updateStatus(id, "approved");
+                                setOpenMenu(null);
+                              }}
+                              className="w-full text-left px-4 py-3 text-green-600 hover:bg-green-50"
+                            >
+                              Approve
+                            </button>
 
-                          <button
-                            onClick={() => {
-                              updateStatus(
-                                expense.expense_id,
-                                "approved"
-                              );
-                              setOpenMenu(null);
-                            }}
-                            className="w-full text-left px-4 py-3 hover:bg-green-50 text-green-600"
-                          >
-                            Approve
-                          </button>
+                            <button
+                              onClick={() => {
+                                updateStatus(id, "rejected");
+                                setOpenMenu(null);
+                              }}
+                              className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50"
+                            >
+                              Reject
+                            </button>
 
-                          <button
-                            onClick={() => {
-                              updateStatus(
-                                expense.expense_id,
-                                "rejected"
-                              );
-                              setOpenMenu(null);
-                            }}
-                            className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600"
-                          >
-                            Reject
-                          </button>
+                          </div>
+                        )}
 
-                        </div>
-                      )}
+                      </td>
 
-                    </td>
-
-                  </tr>
-                ))
+                    </tr>
+                  );
+                })
               )}
             </tbody>
 
