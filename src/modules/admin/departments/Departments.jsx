@@ -75,7 +75,7 @@ const Departments = () => {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-800">Departments</h1>
-                <p className="text-gray-500">Manage system departments and permissions</p>
+                <p className="text-gray-500">Manage system departments</p>
               </div>
             </div>
             <Link
@@ -100,10 +100,6 @@ const Departments = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">DEPARTMENT</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CODE</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">MANAGER</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USERS</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PERMISSIONS</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CREATED</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTIONS</th>
                   </tr>
                 </thead>
@@ -134,26 +130,6 @@ const Departments = () => {
                             <span className="text-sm text-gray-400 italic">Not assigned</span>
                           )}
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-gray-900">{dept.users_count || dept.users || 0}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-gray-900">{dept.permissions_count || dept.permissions || 0}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          dept.status === "Active" 
-                            ? "bg-green-100 text-green-800" 
-                            : dept.status === "Inactive" 
-                            ? "bg-red-100 text-red-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}>
-                          {dept.status || "Active"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm text-gray-600">{formatDate(dept.created_at)}</span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
