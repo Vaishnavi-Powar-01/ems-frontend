@@ -62,11 +62,11 @@ const Login = () => {
           break;
 
         case "hr":
-          navigate("/hr");
+          navigate("/dashboard");
           break;
 
         case "manager":
-          navigate("/manager");
+          navigate("/dashboard");
           break;
 
         case "employee":
