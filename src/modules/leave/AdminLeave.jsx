@@ -141,7 +141,7 @@ const AdminLeave = () => {
                       }`}
                     >
                       <td className="p-4 font-medium text-gray-800">{leave.name}</td>
-                      <td className="p-4 text-gray-600">{leave.department_name}</td>
+                      <td className="p-4 text-gray-600">{leave.department_name || leave.department}</td>
                       <td className="p-4 text-gray-600">{leave.leave_type}</td>
                       <td className="p-4 text-gray-600">{leave.from_date?.split("T")[0]}</td>
                       <td className="p-4 text-gray-600">{leave.to_date?.split("T")[0]}</td>

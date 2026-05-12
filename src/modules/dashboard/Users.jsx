@@ -37,9 +37,7 @@ const Users = () => {
   const fetchUsers = async () => {
     try {
       setTableLoading(true);
-
       const res = await API.get("/users");
-
       setUsers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
@@ -48,26 +46,18 @@ const Users = () => {
     }
   };
 
-  // ================= FETCH ROLES =================
   const fetchRoles = async () => {
     try {
       const res = await API.get("/roles");
-
-      setRoles(
-        Array.isArray(res.data)
-          ? res.data
-          : res.data.roles || []
-      );
+      setRoles(Array.isArray(res.data) ? res.data : res.data.roles || []);
     } catch (err) {
       console.error(err);
     }
   };
 
-  // ================= FETCH DEPARTMENTS =================
   const fetchDepartments = async () => {
     try {
       const res = await API.get("/departments");
-
       setDepartments(
         Array.isArray(res.data)
           ? res.data
@@ -87,7 +77,6 @@ const Users = () => {
   // ================= OPEN ADD =================
   const openAddModal = () => {
     setEditingUser(null);
-
     setForm({
       name: "",
       email: "",
@@ -95,14 +84,12 @@ const Users = () => {
       role_id: "",
       department_id: "",
     });
-
     setIsModalOpen(true);
   };
 
   // ================= OPEN EDIT =================
   const openEditModal = (user) => {
     setEditingUser(user);
-
     setForm({
       name: user.name || "",
       email: user.email || "",
@@ -110,16 +97,11 @@ const Users = () => {
       role_id: user.role_id || "",
       department_id: user.department_id || "",
     });
-
     setIsModalOpen(true);
   };
 
-  // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   // ================= SUBMIT =================
@@ -129,7 +111,6 @@ const Users = () => {
     try {
       setLoading(true);
 
-      // IMPORTANT FIX
       const payload = {
         ...form,
         role_id: Number(form.role_id),
@@ -138,59 +119,36 @@ const Users = () => {
           : null,
       };
 
-      // Remove empty password on edit
       if (editingUser && !payload.password) {
         delete payload.password;
       }
 
       if (editingUser) {
         await API.put(`/users/${editingUser.id}`, payload);
-
         alert("User updated successfully");
       } else {
         await API.post("/users", payload);
-
         alert("User created successfully");
       }
 
       setIsModalOpen(false);
-
       fetchUsers();
-
     } catch (err) {
       console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-          "Something went wrong"
-      );
+      alert(err.response?.data?.message || "Error");
     } finally {
       setLoading(false);
     }
   };
 
-  // ================= DELETE =================
   const deleteUser = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this user?"
-    );
-
-    if (!confirmDelete) return;
+    if (!window.confirm("Delete this user?")) return;
 
     try {
       await API.delete(`/users/${id}`);
-
-      alert("User deleted successfully");
-
       fetchUsers();
-
     } catch (err) {
       console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-          "Failed to delete user"
-      );
     }
   };
 
@@ -199,350 +157,174 @@ const Users = () => {
       <div className="p-6">
 
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div className="flex justify-between items-center mb-8">
 
-          <div className="flex items-center gap-4">
-
-            <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center shadow-sm">
-              <UsersIcon className="text-blue-600" size={28} />
-            </div>
-
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">
-                Users Management
-              </h1>
-
-              <p className="text-gray-500 mt-1">
-                Manage users, roles and departments
-              </p>
-            </div>
-
+          <div className="flex items-center gap-3">
+            <UsersIcon className="text-blue-600" size={30} />
+            <h1 className="text-2xl font-bold">Users</h1>
           </div>
 
           <button
             onClick={openAddModal}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl transition-all shadow-md"
+            className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl"
           >
             <Plus size={18} />
-            Create User
+            Add User
           </button>
 
         </div>
 
-        {/* TABLE */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* CARDS */}
+        {tableLoading ? (
+          <div className="flex justify-center">
+            <Loader2 className="animate-spin text-blue-600" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 
-          <div className="overflow-x-auto">
+            {users.map((u) => (
+              <div
+                key={u.id}
+                className="bg-white rounded-2xl shadow p-5 border hover:shadow-md transition"
+              >
 
-            <table className="w-full">
+                {/* USER INFO */}
+                <div className="flex items-center gap-3 mb-4">
 
-              <thead className="bg-gray-50 border-b">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
+                    {u.name?.charAt(0)?.toUpperCase()}
+                  </div>
 
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    User
-                  </th>
+                  <div>
+                    <h2 className="font-semibold">{u.name}</h2>
+                    <p className="text-sm text-gray-500 flex items-center gap-1">
+                      <Mail size={14} /> {u.email}
+                    </p>
+                  </div>
 
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Email
-                  </th>
+                </div>
 
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Role
-                  </th>
+                {/* ROLE + DEPT DISPLAY */}
+                <div className="flex flex-col gap-2 text-sm mb-4">
 
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Department
-                  </th>
+                  <span className="flex items-center gap-1 text-blue-600">
+                    <Shield size={14} />
+                    {u.role_name || "No Role"}
+                  </span>
 
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">
-                    Actions
-                  </th>
-                </tr>
+                  <span className="flex items-center gap-1 text-gray-600">
+                    <Building2 size={14} />
+                    {u.department_name || "No Department"}
+                  </span>
 
-              </thead>
+                </div>
 
-              <tbody>
+                {/* ACTIONS */}
+                <div className="flex justify-end gap-2">
 
-                {tableLoading ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-14 text-center"
-                    >
-                      <Loader2 className="animate-spin mx-auto text-blue-600 mb-2" />
-                      <p className="text-gray-500">
-                        Loading users...
-                      </p>
-                    </td>
-                  </tr>
-                ) : users.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-14 text-center text-gray-400"
-                    >
-                      No users found
-                    </td>
-                  </tr>
-                ) : (
-                  users.map((u) => (
-                    <tr
-                      key={u.id}
-                      className="border-b hover:bg-gray-50 transition"
-                    >
+                  <button
+                    onClick={() => openEditModal(u)}
+                    className="p-2 bg-blue-50 text-blue-600 rounded-lg"
+                  >
+                    <Pencil size={16} />
+                  </button>
 
-                      {/* USER */}
-                      <td className="px-6 py-4">
+                  <button
+                    onClick={() => deleteUser(u.id)}
+                    className="p-2 bg-red-50 text-red-600 rounded-lg"
+                  >
+                    <Trash2 size={16} />
+                  </button>
 
-                        <div className="flex items-center gap-3">
+                </div>
 
-                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-semibold text-blue-600">
-                            {u.name?.charAt(0)?.toUpperCase()}
-                          </div>
-
-                          <div>
-                            <p className="font-medium text-gray-800">
-                              {u.name}
-                            </p>
-                          </div>
-
-                        </div>
-
-                      </td>
-
-                      {/* EMAIL */}
-                      <td className="px-6 py-4 text-gray-600">
-                        {u.email}
-                      </td>
-
-                      {/* ROLE */}
-                      <td className="px-6 py-4">
-
-                        <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
-                          <Shield size={14} />
-                          {u.role_name || "N/A"}
-                        </span>
-
-                      </td>
-
-                      {/* DEPARTMENT */}
-                      <td className="px-6 py-4">
-
-                        {u.department_name ? (
-                          <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                            <Building2 size={14} />
-                            {u.department_name}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">
-                            —
-                          </span>
-                        )}
-
-                      </td>
-
-                      {/* ACTIONS */}
-                      <td className="px-6 py-4">
-
-                        <div className="flex items-center justify-center gap-2">
-
-                          <button
-                            onClick={() => openEditModal(u)}
-                            className="w-9 h-9 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition"
-                          >
-                            <Pencil size={16} />
-                          </button>
-
-                          <button
-                            onClick={() => deleteUser(u.id)}
-                            className="w-9 h-9 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-
-                        </div>
-
-                      </td>
-
-                    </tr>
-                  ))
-                )}
-
-              </tbody>
-
-            </table>
+              </div>
+            ))}
 
           </div>
+        )}
 
-        </div>
       </div>
 
       {/* MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
 
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
+          <div className="bg-white w-full max-w-lg rounded-2xl">
 
-            {/* MODAL HEADER */}
-            <div className="flex items-center justify-between px-6 py-5 border-b">
-
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {editingUser
-                    ? "Edit User"
-                    : "Create User"}
-                </h2>
-
-                <p className="text-sm text-gray-500 mt-1">
-                  Manage user information
-                </p>
-              </div>
-
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="w-10 h-10 rounded-lg hover:bg-gray-100 flex items-center justify-center"
-              >
-                <X size={20} />
-              </button>
-
+            {/* HEADER */}
+            <div className="flex justify-between p-5 border-b">
+              <h2 className="font-bold text-lg">
+                {editingUser ? "Edit User" : "Add User"}
+              </h2>
+              <X onClick={() => setIsModalOpen(false)} />
             </div>
 
             {/* FORM */}
-            <form
-              onSubmit={handleSubmit}
-              className="p-6 space-y-5"
-            >
+            <form onSubmit={handleSubmit} className="p-5 space-y-4">
 
-              {/* NAME */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="Name"
+                className="w-full border p-3 rounded-xl"
+              />
 
-                <input
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Enter full name"
-                  required
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <input
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="Email"
+                className="w-full border p-3 rounded-xl"
+              />
 
-              {/* EMAIL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
+              <input
+                name="password"
+                type="password"
+                value={form.password}
+                onChange={handleChange}
+                placeholder="Password"
+                className="w-full border p-3 rounded-xl"
+              />
 
-                <div className="relative">
-                  <Mail
-                    size={18}
-                    className="absolute left-3 top-3.5 text-gray-400"
-                  />
+              {/* ROLE DROPDOWN */}
+              <select
+                name="role_id"
+                value={form.role_id}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-xl"
+              >
+                <option value="">Select Role</option>
+                {roles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.name || r.role_name}
+                  </option>
+                ))}
+              </select>
 
-                  <input
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="Enter email"
-                    required
-                    className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
+              {/* DEPARTMENT DROPDOWN */}
+              <select
+                name="department_id"
+                value={form.department_id}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-xl"
+              >
+                <option value="">Select Department</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.department_name}
+                  </option>
+                ))}
+              </select>
 
-              {/* PASSWORD */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-
-                <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder={
-                    editingUser
-                      ? "Leave blank to keep current password"
-                      : "Enter password"
-                  }
-                  required={!editingUser}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* ROLE + DEPARTMENT */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                {/* ROLE */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Role
-                  </label>
-
-                  <select
-                    name="role_id"
-                    value={form.role_id}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">
-                      Select Role
-                    </option>
-
-                    {roles.map((r) => (
-                      <option
-                        key={r.id}
-                        value={r.id}
-                      >
-                        {r.name || r.role_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* DEPARTMENT */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Department
-                  </label>
-
-                  <select
-                    name="department_id"
-                    value={form.department_id}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">
-                      Select Department
-                    </option>
-
-                    {departments.map((d) => (
-                      <option
-                        key={d.id}
-                        value={d.id}
-                      >
-                        {d.department_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-              </div>
-
-              {/* FOOTER */}
-              <div className="flex justify-end gap-3 pt-3">
+              {/* BUTTONS */}
+              <div className="flex justify-end gap-3">
 
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
+                  className="px-4 py-2 border rounded-xl"
                 >
                   Cancel
                 </button>
@@ -550,24 +332,11 @@ const Users = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl transition disabled:opacity-50"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-xl flex items-center gap-2"
                 >
-                  {loading ? (
-                    <>
-                      <Loader2
-                        size={18}
-                        className="animate-spin"
-                      />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save size={18} />
-                      {editingUser
-                        ? "Update User"
-                        : "Create User"}
-                    </>
-                  )}
+                  {loading && <Loader2 className="animate-spin" size={16} />}
+                  <Save size={16} />
+                  Save
                 </button>
 
               </div>
