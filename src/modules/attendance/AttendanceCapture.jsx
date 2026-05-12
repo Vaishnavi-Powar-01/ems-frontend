@@ -22,8 +22,8 @@ const getDistanceInMeters = (lat1, lon1, lat2, lon2) => {
 
 // Your office coordinates (same as backend)
 const OFFICE_LOCATION = {
-  latitude: 16.270867,   // Replace with your office lat
-  longitude: 74.361626   // Replace with your office lng
+  latitude: 18.605573256150308,
+  longitude: 73.78439712030278  // Replace with your office lng
 };
 const ALLOWED_RADIUS = 500; // 500 meters
 
