@@ -6,6 +6,8 @@ import {
 import DashboardLayout from "../../layouts/DashboardLayout";
 
 import API from "../../api/axios";
+const IMAGE_BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "");
+
 
 const AdminExpense = () => {
 
@@ -344,7 +346,7 @@ const AdminExpense = () => {
                         {expense.bill_image ? (
 
                           <a
-                            href={`${import.meta.env.VITE_API_URL}/uploads/attendance/${expense.bill_image}`}
+                            href={`${IMAGE_BASE_URL}/uploads/expenses/${expense.bill_image}`}
                             target="_blank"
                             rel="noreferrer"
                             className="text-blue-600 hover:text-blue-800 underline"
