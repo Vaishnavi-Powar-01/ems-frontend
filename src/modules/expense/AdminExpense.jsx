@@ -51,30 +51,19 @@ const AdminExpense = () => {
 
 
   // UPDATE STATUS
-  const updateStatus =
-    async (id, status) => {
+ const updateStatus = async (id, status) => {
+  try {
+    const res = await API.put(`/expenses/update-status/${id}`, {
+      status,
+    });
 
-      try {
+    console.log("UPDATE RESPONSE:", res.data);
 
-        await API.put(
-          `/expenses/update-status/${id}`,
-          {
-            status,
-          }
-        );
-
-        alert(
-          "Expense Updated"
-        );
-
-        fetchExpenses();
-
-      } catch (error) {
-
-        console.log(error);
-
-      }
-    };
+    fetchExpenses();
+  } catch (err) {
+    console.log("ERROR:", err.response?.data || err.message);
+  }
+};
 
 
   useEffect(() => {
