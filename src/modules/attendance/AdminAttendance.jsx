@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import API from "../../api/axios";
+import { getImageUrl } from "../../utils/imageUrl";
 
 const IMAGE_BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "");
 
@@ -132,7 +133,7 @@ const AdminAttendance = () => {
                         {/* ✅ FIX: use getImageUrl() helper */}
                         {getImageUrl(item.punch_in_selfie) ? (
                           <img
-                            src={getImageUrl(item.punch_in_selfie)}
+                            src={getImageUrl("attendance",item.punch_in_selfie)}
                             alt="Punch In Selfie"
                             className="w-14 h-14 rounded-xl object-cover border"
                             onError={(e) => {
@@ -167,7 +168,7 @@ const AdminAttendance = () => {
                         {/* ✅ FIX: use getImageUrl() helper */}
                         {getImageUrl(item.punch_out_selfie) ? (
                           <img
-                            src={getImageUrl(item.punch_out_selfie)}
+                            src={getImageUrl("attendance",item.punch_out_selfie)}
                             alt="Punch Out Selfie"
                             className="w-14 h-14 rounded-xl object-cover border"
                             onError={(e) => {
@@ -179,7 +180,7 @@ const AdminAttendance = () => {
                         <div
                           className="w-14 h-14 rounded-xl bg-gray-100 items-center justify-center text-xs text-gray-400"
                           style={{
-                            display: getImageUrl(item.punch_out_selfie)
+                            display: getImageUrl("attendance",item.punch_out_selfie)
                               ? "none"
                               : "flex",
                           }}

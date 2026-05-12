@@ -1,581 +1,171 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import API from "../../api/axios";
-
-import {
-  Users as UsersIcon,
-  Plus,
-  Pencil,
-  Trash2,
-  X,
-  Save,
-  Loader2,
-  Mail,
-  Shield,
-  Building2,
+import { 
+  Users as UsersIcon, Plus, Pencil, Trash2, X, Save, Loader2, Mail, Shield, Building2 
 } from "lucide-react";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [departments, setDepartments] = useState([]);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(true);
 
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    role_id: "",
-    department_id: "",
+    name: "", email: "", password: "", role_id: "", department_id: "",
   });
 
-  // ================= FETCH USERS =================
-  const fetchUsers = async () => {
+  // Fetch all necessary data
+  const fetchData = async () => {
+    setTableLoading(true);
     try {
-      setTableLoading(true);
-
-      const res = await API.get("/users");
-
-      setUsers(Array.isArray(res.data) ? res.data : []);
+      const [uRes, rRes, dRes] = await Promise.all([
+        API.get("/users"),
+        API.get("/roles"),
+        API.get("/departments")
+      ]);
+      setUsers(uRes.data);
+      setRoles(Array.isArray(rRes.data) ? rRes.data : rRes.data.roles || []);
+      setDepartments(Array.isArray(dRes.data) ? dRes.data : dRes.data.departments || []);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch Error:", err);
     } finally {
       setTableLoading(false);
     }
   };
 
-  // ================= FETCH ROLES =================
-  const fetchRoles = async () => {
-    try {
-      const res = await API.get("/roles");
+  useEffect(() => { fetchData(); }, []);
 
-      setRoles(
-        Array.isArray(res.data)
-          ? res.data
-          : res.data.roles || []
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  // ================= FETCH DEPARTMENTS =================
-  const fetchDepartments = async () => {
-    try {
-      const res = await API.get("/departments");
-
-      setDepartments(
-        Array.isArray(res.data)
-          ? res.data
-          : res.data.departments || []
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-    fetchRoles();
-    fetchDepartments();
-  }, []);
-
-  // ================= OPEN ADD =================
-  const openAddModal = () => {
-    setEditingUser(null);
-
-    setForm({
-      name: "",
-      email: "",
-      password: "",
-      role_id: "",
-      department_id: "",
-    });
-
-    setIsModalOpen(true);
-  };
-
-  // ================= OPEN EDIT =================
-  const openEditModal = (user) => {
-    setEditingUser(user);
-
-    setForm({
-      name: user.name || "",
-      email: user.email || "",
-      password: "",
-      role_id: user.role_id || "",
-      department_id: user.department_id || "",
-    });
-
-    setIsModalOpen(true);
-  };
-
-  // ================= HANDLE CHANGE =================
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     try {
-      setLoading(true);
-
-      // IMPORTANT FIX
       const payload = {
         ...form,
         role_id: Number(form.role_id),
-        department_id: form.department_id
-          ? Number(form.department_id)
-          : null,
+        department_id: form.department_id ? Number(form.department_id) : null,
       };
 
-      // Remove empty password on edit
-      if (editingUser && !payload.password) {
-        delete payload.password;
-      }
-
       if (editingUser) {
+        if (!payload.password) delete payload.password;
         await API.put(`/users/${editingUser.id}`, payload);
-
-        alert("User updated successfully");
       } else {
         await API.post("/users", payload);
-
-        alert("User created successfully");
       }
-
       setIsModalOpen(false);
-
-      fetchUsers();
-
+      fetchData();
     } catch (err) {
-      console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-          "Something went wrong"
-      );
+      alert(err.response?.data?.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  // ================= DELETE =================
   const deleteUser = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this user?"
-    );
-
-    if (!confirmDelete) return;
-
+    if (!window.confirm("Are you sure?")) return;
     try {
       await API.delete(`/users/${id}`);
-
-      alert("User deleted successfully");
-
-      fetchUsers();
-
-    } catch (err) {
-      console.error(err);
-
-      alert(
-        err.response?.data?.message ||
-          "Failed to delete user"
-      );
-    }
+      fetchData();
+    } catch (err) { alert("Failed to delete"); }
   };
 
   return (
     <DashboardLayout>
       <div className="p-6">
-
-        {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-
+        <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-4">
-
-            <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center shadow-sm">
-              <UsersIcon className="text-blue-600" size={28} />
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <UsersIcon className="text-blue-600" size={24} />
             </div>
-
             <div>
-              <h1 className="text-3xl font-bold text-gray-800">
-                Users Management
-              </h1>
-
-              <p className="text-gray-500 mt-1">
-                Manage users, roles and departments
-              </p>
+              <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+              <p className="text-sm text-gray-500">Create and manage staff accounts</p>
             </div>
-
           </div>
-
-          <button
-            onClick={openAddModal}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl transition-all shadow-md"
-          >
-            <Plus size={18} />
-            Create User
+          <button onClick={() => { setEditingUser(null); setForm({name:"", email:"", password:"", role_id:"", department_id:""}); setIsModalOpen(true); }}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition shadow-sm">
+            <Plus size={18} /> Create User
           </button>
-
         </div>
 
-        {/* TABLE */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-
-          <div className="overflow-x-auto">
-
-            <table className="w-full">
-
-              <thead className="bg-gray-50 border-b">
-
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    User
-                  </th>
-
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Email
-                  </th>
-
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Role
-                  </th>
-
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
-                    Department
-                  </th>
-
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-600">
-                    Actions
-                  </th>
-                </tr>
-
-              </thead>
-
-              <tbody>
-
-                {tableLoading ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-14 text-center"
-                    >
-                      <Loader2 className="animate-spin mx-auto text-blue-600 mb-2" />
-                      <p className="text-gray-500">
-                        Loading users...
-                      </p>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50 text-gray-600 text-sm">
+              <tr>
+                <th className="px-6 py-4 text-left font-semibold">User</th>
+                <th className="px-6 py-4 text-left font-semibold">Role</th>
+                <th className="px-6 py-4 text-left font-semibold">Department</th>
+                <th className="px-6 py-4 text-center font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {tableLoading ? (
+                <tr><td colSpan={4} className="py-10 text-center"><Loader2 className="animate-spin mx-auto text-blue-600" /></td></tr>
+              ) : (
+                users.map((u) => (
+                  <tr key={u.id} className="hover:bg-gray-50 transition">
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-gray-800">{u.name}</div>
+                      <div className="text-xs text-gray-400">{u.email}</div>
                     </td>
-                  </tr>
-                ) : users.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={5}
-                      className="py-14 text-center text-gray-400"
-                    >
-                      No users found
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full text-xs font-semibold">
+                        <Shield size={12} /> {u.role_name || "N/A"}
+                      </span>
                     </td>
-                  </tr>
-                ) : (
-                  users.map((u) => (
-                    <tr
-                      key={u.id}
-                      className="border-b hover:bg-gray-50 transition"
-                    >
-
-                      {/* USER */}
-                      <td className="px-6 py-4">
-
-                        <div className="flex items-center gap-3">
-
-                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-semibold text-blue-600">
-                            {u.name?.charAt(0)?.toUpperCase()}
-                          </div>
-
-                          <div>
-                            <p className="font-medium text-gray-800">
-                              {u.name}
-                            </p>
-                          </div>
-
-                        </div>
-
-                      </td>
-
-                      {/* EMAIL */}
-                      <td className="px-6 py-4 text-gray-600">
-                        {u.email}
-                      </td>
-
-                      {/* ROLE */}
-                      <td className="px-6 py-4">
-
-                        <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
-                          <Shield size={14} />
-                          {u.role_name || "N/A"}
+                    <td className="px-6 py-4">
+                      {u.department_name ? (
+                        <span className="inline-flex items-center gap-1.5 bg-gray-50 text-gray-600 px-2.5 py-1 rounded-full text-xs">
+                          <Building2 size={12} /> {u.department_name}
                         </span>
-
-                      </td>
-
-                      {/* DEPARTMENT */}
-                      <td className="px-6 py-4">
-
-                        {u.department_name ? (
-                          <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                            <Building2 size={14} />
-                            {u.department_name}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">
-                            —
-                          </span>
-                        )}
-
-                      </td>
-
-                      {/* ACTIONS */}
-                      <td className="px-6 py-4">
-
-                        <div className="flex items-center justify-center gap-2">
-
-                          <button
-                            onClick={() => openEditModal(u)}
-                            className="w-9 h-9 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition"
-                          >
-                            <Pencil size={16} />
-                          </button>
-
-                          <button
-                            onClick={() => deleteUser(u.id)}
-                            className="w-9 h-9 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-
-                        </div>
-
-                      </td>
-
-                    </tr>
-                  ))
-                )}
-
-              </tbody>
-
-            </table>
-
-          </div>
-
+                      ) : <span className="text-gray-300">—</span>}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex justify-center gap-2">
+                        <button onClick={() => { setEditingUser(u); setForm({ ...u, password: "" }); setIsModalOpen(true); }} className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg"><Pencil size={16} /></button>
+                        <button onClick={() => deleteUser(u.id)} className="p-2 hover:bg-red-50 text-red-600 rounded-lg"><Trash2 size={16} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* MODAL */}
+      {/* Modal Section */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden">
-
-            {/* MODAL HEADER */}
-            <div className="flex items-center justify-between px-6 py-5 border-b">
-
-              <div>
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {editingUser
-                    ? "Edit User"
-                    : "Create User"}
-                </h2>
-
-                <p className="text-sm text-gray-500 mt-1">
-                  Manage user information
-                </p>
-              </div>
-
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="w-10 h-10 rounded-lg hover:bg-gray-100 flex items-center justify-center"
-              >
-                <X size={20} />
-              </button>
-
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-md rounded-xl shadow-xl overflow-hidden">
+            <div className="px-6 py-4 border-b flex justify-between items-center">
+              <h3 className="text-lg font-bold">{editingUser ? "Edit User" : "Add User"}</h3>
+              <button onClick={() => setIsModalOpen(false)}><X size={20}/></button>
             </div>
-
-            {/* FORM */}
-            <form
-              onSubmit={handleSubmit}
-              className="p-6 space-y-5"
-            >
-
-              {/* NAME */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Full Name
-                </label>
-
-                <input
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Enter full name"
-                  required
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                />
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <input name="name" value={form.name} onChange={handleChange} placeholder="Full Name" required className="w-full border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+              <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" required className="w-full border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+              <input name="password" type="password" value={form.password} onChange={handleChange} placeholder={editingUser ? "Leave blank to keep same" : "Password"} required={!editingUser} className="w-full border p-2.5 rounded-lg outline-none focus:ring-2 focus:ring-blue-500" />
+              <div className="grid grid-cols-2 gap-4">
+                <select name="role_id" value={form.role_id} onChange={handleChange} required className="border p-2.5 rounded-lg outline-none">
+                  <option value="">Select Role</option>
+                  {roles.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                </select>
+                <select name="department_id" value={form.department_id} onChange={handleChange} className="border p-2.5 rounded-lg outline-none">
+                  <option value="">No Dept</option>
+                  {departments.map(d => <option key={d.id} value={d.id}>{d.department_name}</option>)}
+                </select>
               </div>
-
-              {/* EMAIL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
-                </label>
-
-                <div className="relative">
-                  <Mail
-                    size={18}
-                    className="absolute left-3 top-3.5 text-gray-400"
-                  />
-
-                  <input
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="Enter email"
-                    required
-                    className="w-full border border-gray-300 rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* PASSWORD */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Password
-                </label>
-
-                <input
-                  type="password"
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder={
-                    editingUser
-                      ? "Leave blank to keep current password"
-                      : "Enter password"
-                  }
-                  required={!editingUser}
-                  className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* ROLE + DEPARTMENT */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                {/* ROLE */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Role
-                  </label>
-
-                  <select
-                    name="role_id"
-                    value={form.role_id}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">
-                      Select Role
-                    </option>
-
-                    {roles.map((r) => (
-                      <option
-                        key={r.id}
-                        value={r.id}
-                      >
-                        {r.name || r.role_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* DEPARTMENT */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Department
-                  </label>
-
-                  <select
-                    name="department_id"
-                    value={form.department_id}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="">
-                      Select Department
-                    </option>
-
-                    {departments.map((d) => (
-                      <option
-                        key={d.id}
-                        value={d.id}
-                      >
-                        {d.department_name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-              </div>
-
-              {/* FOOTER */}
-              <div className="flex justify-end gap-3 pt-3">
-
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-5 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl transition disabled:opacity-50"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2
-                        size={18}
-                        className="animate-spin"
-                      />
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save size={18} />
-                      {editingUser
-                        ? "Update User"
-                        : "Create User"}
-                    </>
-                  )}
-                </button>
-
-              </div>
-
+              <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition">
+                {loading ? <Loader2 className="animate-spin" size={20}/> : <><Save size={20}/> {editingUser ? "Update" : "Save"}</>}
+              </button>
             </form>
-
           </div>
-
         </div>
       )}
     </DashboardLayout>
