@@ -110,7 +110,7 @@ const Sidebar = () => {
           />
         </svg>
       ),
-      roles: ["admin", "hr", "manager"],
+      roles: ["admin"],
     },
     {
       name: "My Leaves",
