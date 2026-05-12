@@ -559,7 +559,7 @@ const Leave = () => {
                       <td className="px-6 py-4">
                         {leave.document ? (
                           <a
-                            href={`${import.meta.env.VITE_API_URL}/uploads/attendance/${leave.document}`}
+                            href={`${import.meta.env.VITE_API_URL}/uploads/leaves/${leave.document}`}
                             target="_blank"
                             rel="noreferrer"
                             className="text-blue-600 hover:underline"
