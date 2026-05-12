@@ -2,9 +2,6 @@ import { useEffect, useState } from "react";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import API from "../../api/axios";
 
-// ✅ FIX: Separate base URL for images (strips /api from the API URL)
-// VITE_API_URL  = "https://your-backend.com/api"  → for API calls
-// IMAGE_BASE_URL = "https://your-backend.com"      → for static files
 const IMAGE_BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/api\/?$/, "");
 
 // Helper: build full image URL
