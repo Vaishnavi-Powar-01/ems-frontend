@@ -1,22 +1,20 @@
-// DashboardLayout.jsx
-
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
 const DashboardLayout = ({ children }) => {
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen overflow-hidden bg-gray-100">
 
-      {/* Sidebar */}
+      {/* SIDEBAR */}
       <Sidebar />
 
-      {/* Main Content */}
+      {/* MAIN AREA */}
       <div className="flex flex-col flex-1 overflow-hidden">
 
-        {/* Navbar */}
+        {/* NAVBAR */}
         <Navbar />
 
-        {/* Page Content */}
+        {/* PAGE CONTENT */}
         <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>
