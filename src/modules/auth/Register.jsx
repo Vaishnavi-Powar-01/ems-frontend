@@ -1,41 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import API from "../../api/axios";
 
 const Register = () => {
   const navigate = useNavigate();
 
-  // ONLY DEPARTMENTS
-  const [departments, setDepartments] = useState([]);
-
   // FORM DATA
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
-    role: 1, // DEFAULT ADMIN ROLE
-    department: "",
+    role: 1,        // DEFAULT ADMIN
+    department: 1,  // DEFAULT DEPARTMENT
   });
-
-  // FETCH DEPARTMENTS
-  useEffect(() => {
-    fetchDepartments();
-  }, []);
-
-  // GET DEPARTMENTS
-  const fetchDepartments = async () => {
-    try {
-      const res = await API.get("/departments");
-
-      console.log("DEPARTMENTS:", res.data);
-
-      const data = res.data.data || res.data;
-
-      setDepartments(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   // HANDLE CHANGE
   const handleChange = (e) => {
@@ -101,14 +78,14 @@ const Register = () => {
           </h2>
 
           <p className="text-sm text-blue-100 leading-relaxed mb-6">
-            Create your employee account and get access to the complete HR suite.
+            Create your admin account and access the HR suite.
           </p>
 
           <ul className="space-y-3 text-sm text-blue-100">
             <li>✅ Quick setup in minutes</li>
-            <li>🔐 Secure, encrypted access</li>
-            <li>📋 Department assignment</li>
-            <li>🤝 Team collaboration tools</li>
+            <li>🔐 Secure access</li>
+            <li>👨‍💼 Admin privileges enabled</li>
+            <li>🚀 Ready for deployment</li>
           </ul>
 
         </div>
@@ -117,11 +94,11 @@ const Register = () => {
         <div className="flex-1 bg-white flex flex-col justify-center px-10 py-10">
 
           <h1 className="text-2xl font-bold text-gray-800 mb-1">
-            Create account
+            Create Admin Account
           </h1>
 
           <p className="text-sm text-gray-500 mb-6">
-            Register as Admin
+            Register your first administrator
           </p>
 
           <form
@@ -155,7 +132,7 @@ const Register = () => {
               <input
                 type="email"
                 name="email"
-                placeholder="you@gmail.com"
+                placeholder="admin@gmail.com"
                 onChange={handleChange}
                 autoComplete="email"
                 className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -181,31 +158,10 @@ const Register = () => {
               />
             </div>
 
-            {/* DEPARTMENT */}
-            <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Department
-              </label>
-
-              <select
-                name="department"
-                onChange={handleChange}
-                className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm"
-                required
-              >
-                <option value="">
-                  Select department
-                </option>
-
-                {departments.map((department) => (
-                  <option
-                    key={department.id}
-                    value={department.id}
-                  >
-                    {department.department_name}
-                  </option>
-                ))}
-              </select>
+            {/* INFO BOX */}
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 text-sm text-blue-700">
+              Default Role: <strong>Admin</strong> <br />
+              Default Department: <strong>IT</strong>
             </div>
 
             {/* BUTTON */}
