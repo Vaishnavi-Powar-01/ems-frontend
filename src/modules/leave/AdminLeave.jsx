@@ -320,7 +320,7 @@ const AdminLeave = () => {
                       {/* DEPARTMENT */}
                       <td className="p-4 text-gray-600">
                         {
-                          leave.department
+                          leave.department_name
                         }
                       </td>
 
