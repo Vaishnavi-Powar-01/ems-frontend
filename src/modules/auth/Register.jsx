@@ -63,8 +63,13 @@ const Register = () => {
       return;
     }
 
-    if (formData.password.length < 6) {
-      alert("Password must be at least 6 characters");
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#])[A-Za-z\d@$!%*?&^#]{6,}$/;
+
+    if (!passwordRegex.test(formData.password)) {
+      alert(
+        "Password must contain at least 6 characters, 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character.",
+      );
       return;
     }
 
@@ -75,7 +80,7 @@ const Register = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
-        role: formData.role,         // already lowercase from option value
+        role: formData.role, // already lowercase from option value
         department: formData.department,
       };
 
@@ -93,22 +98,18 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-blue-50">
-
       <div className="flex w-[860px] min-h-[520px] rounded-2xl overflow-hidden shadow-xl border border-blue-100">
-
         {/* LEFT PANEL */}
         <div className="w-72 bg-blue-600 flex flex-col justify-center px-8 py-10 text-white">
-
           <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-5 text-2xl">
             🏢
           </div>
 
-          <h2 className="text-xl font-bold mb-2">
-            Join the Portal
-          </h2>
+          <h2 className="text-xl font-bold mb-2">Join the Portal</h2>
 
           <p className="text-sm text-blue-100 leading-relaxed mb-6">
-            Create your employee account and get access to the complete HR suite.
+            Create your employee account and get access to the complete HR
+            suite.
           </p>
 
           <ul className="space-y-3 text-sm text-blue-100">
@@ -117,12 +118,10 @@ const Register = () => {
             <li>📋 Role & Department assignment</li>
             <li>🤝 Team collaboration tools</li>
           </ul>
-
         </div>
 
         {/* RIGHT PANEL */}
         <div className="flex-1 bg-white flex flex-col justify-center px-10 py-10">
-
           <h1 className="text-2xl font-bold text-gray-800 mb-1">
             Create account
           </h1>
@@ -132,7 +131,6 @@ const Register = () => {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-
             {/* NAME */}
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-1">
@@ -141,7 +139,7 @@ const Register = () => {
               <input
                 type="text"
                 name="name"
-                value={formData.name}               // ✅ controlled
+                value={formData.name} // ✅ controlled
                 placeholder="Jane Smith"
                 onChange={handleChange}
                 className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -157,7 +155,7 @@ const Register = () => {
               <input
                 type="email"
                 name="email"
-                value={formData.email}              // ✅ controlled
+                value={formData.email} // ✅ controlled
                 placeholder="you@gmail.com"
                 onChange={handleChange}
                 className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -173,10 +171,9 @@ const Register = () => {
               <input
                 type="password"
                 name="password"
-                value={formData.password}           // ✅ controlled
-                placeholder="Minimum 6 characters"
+                value={formData.password}
+                placeholder="Min 6 chars, Aa1@"
                 onChange={handleChange}
-                minLength={6}
                 className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                 required
               />
@@ -184,7 +181,6 @@ const Register = () => {
 
             {/* ROLE + DEPARTMENT */}
             <div className="flex gap-4">
-
               {/* ROLE */}
               <div className="flex-1">
                 <label className="text-sm font-medium text-gray-700 block mb-1">
@@ -192,7 +188,7 @@ const Register = () => {
                 </label>
                 <select
                   name="role"
-                  value={formData.role}             // ✅ FIX: controlled select
+                  value={formData.role} // ✅ FIX: controlled select
                   onChange={handleChange}
                   className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   required
@@ -213,7 +209,7 @@ const Register = () => {
                 </label>
                 <select
                   name="department"
-                  value={formData.department}       // ✅ FIX: controlled select
+                  value={formData.department} // ✅ FIX: controlled select
                   onChange={handleChange}
                   className="w-full border border-gray-200 bg-gray-50 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   required
@@ -226,7 +222,6 @@ const Register = () => {
                   ))}
                 </select>
               </div>
-
             </div>
 
             {/* BUTTON */}
@@ -236,7 +231,6 @@ const Register = () => {
             >
               Create account
             </button>
-
           </form>
 
           {/* LOGIN */}
@@ -246,11 +240,8 @@ const Register = () => {
               Sign in
             </Link>
           </p>
-
         </div>
-
       </div>
-
     </div>
   );
 };
